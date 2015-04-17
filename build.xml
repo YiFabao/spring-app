@@ -1,0 +1,155 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.    
+-->
+<project name="spring-app" default="test" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<!-- 引用第三方包目录 -->
+	<property name="lib.dir" value="lib" />
+	<!-- 编译目录 -->
+	<property name="build.dir" value="build" />
+	<property name="build.classes.dir" value="${build.dir}/classes" />
+	<!-- 源码目录 -->
+	<property name="src.dir" value="src" />
+	<!-- 资源目录 -->
+	<property name = "resources.dir" value = "resources" />
+	<!-- 发布目录 -->
+	<property name = "dist.dir" value = "dist" />
+	<!-- javaDoc 文档目录 -->
+	<property name="javadoc.dir" value = "doc" />
+
+	<!-- paths used for compilation and run  -->
+	<path id="lib.path.id">
+		<fileset dir="${lib.dir}" />
+	</path>
+
+	<path id="compile.classpath">
+		<path refid="lib.path.id"/>
+	</path>
+
+	<path id="run.classpath">
+		<path refid="compile.classpath" />
+		<path location="${build.classes.dir}" />
+	</path>
+
+	<target name="init">
+		<mkdir dir="${build.classes.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${javadoc.dir}"/>
+		<copy todir="${build.classes.dir}">
+			<fileset dir="${resources.dir}"/>
+		</copy>
+	</target>
+
+	<target name="resolve" depends="init" description="--> retreive dependencies with ivy">
+		<ivy:retrieve />
+	</target>
+
+	<target name="report" depends="resolve" description="--> generates a report of dependencies">
+		<ivy:report todir="${build.dir}"/>
+	</target>
+
+	<target name="compile" depends="resolve">
+		<javac destdir="${build.classes.dir}" includeAntRuntime="false">
+			<src path="${src.dir}"/>
+			<classpath refid="compile.classpath"/>
+		</javac>
+	</target>
+
+
+	<target name="clean" description="--> clean the project">
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+	</target>
+
+
+	<target name="clean-cache" description="--> clean the ivy cache">
+		<ivy:cleancache />
+	</target>
+
+	<!--==================================test======================================== -->
+	<property name="test.dir" location="${build.dir}/test" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
+	<property name="test.data.dir" location="${test.dir}/data" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+
+	<path id="test.compile.classpath">
+		<path refid="lib.path.id"/>
+		<pathelement location="${build.classes.dir}"/>
+	</path>
+
+	<path id="test.classpath">
+		<path refid="test.compile.classpath" />
+		<pathelement location="${test.classes.dir}" />
+	</path>
+
+	<target name="test-init">
+		<mkdir dir="${test.classes.dir}" />
+		<delete dir="${test.data.dir}" />
+		<delete dir="${test.reports.dir}" />
+		<mkdir dir="${test.data.dir}" />
+		<mkdir dir="${test.reports.dir}" />
+	</target>
+
+	<target name="test-compile" depends="compile,test-init">
+		<javac destdir="${test.classes.dir}" debug="true" includeAntRuntime="false" srcdir="test">
+			<classpath refid="test.compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="test" depends="test-compile">
+		<junit printsummary="false" errorProperty ="test.failed" failureProperty="test.failed">
+			<classpath>
+				<path refid="test.classpath" />
+				<pathelement path="${java.class.path}" />
+			</classpath>
+			<formatter type="brief" usefile="false" />
+			<formatter type="xml" />
+			<test name="${testcase}" todir="${test.data.dir}" if="testcase"/>
+			<batchtest todir="${test.data.dir}" unless="testcase">
+				<fileset dir="${test.classes.dir}" includes="**/*Test*.class" />
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${test.data.dir}">
+			<fileset dir="${test.data.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.reports.dir}" />
+		</junitreport>
+
+		<fail if="test.failed">
+		Tests failed. Check ${test.reports.dir}
+		</fail>
+	</target>
+
+	<!--===============================================生成文档=================================================-->
+	<target name="javadocs" depends="compile" description="make the java docs">
+		<javadoc access="private" 
+				sourcepath="src" 
+				destdir="${javadoc.dir}"
+				packagenames="com.*" 
+				use="true" 
+				version="true" 
+				encoding="UTF-8"
+				charset="UTF-8"
+				windowtitle="${ant.project.name}" 
+				failonerror="true">
+			<classpath refid="compile.classpath" />
+		</javadoc>
+	</target>
+
+</project>
