@@ -21,5 +21,6 @@
     <dependencies>
         <dependency org="junit" name="junit" rev="4.12"/>
         <dependency org="org.springframework" name="spring-context" rev="4.1.6.RELEASE"/>
+        <dependency org="dom4j" name="dom4j" rev="1.6.1"/>
     </dependencies>
 </ivy-module>

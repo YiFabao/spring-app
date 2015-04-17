@@ -144,6 +144,7 @@
 				packagenames="com.*" 
 				use="true" 
 				version="true" 
+				dencoding="GBK"
 				encoding="UTF-8"
 				charset="UTF-8"
 				windowtitle="${ant.project.name}" 

@@ -17,6 +17,6 @@ public class MyTest1 extends TestCase{
 	public void testStudentMethod(){
 		Student student = new Student();
 		String msg = student.go();
-		assertEquals(msg, "去教室上课1");
+		assertEquals(msg, "去教室上课");
 	}
 }
