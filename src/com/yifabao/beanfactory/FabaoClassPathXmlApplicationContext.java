@@ -1,5 +1,10 @@
 package com.yifabao.beanfactory;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +18,7 @@ import org.dom4j.XPath;
 import org.dom4j.io.SAXReader;
 
 import com.yifabao.beans.BeanDefinition;
+import com.yifabao.beans.PropertyDefinition;
 
 /**
  * 易发宝版的bean 容器
@@ -32,6 +38,48 @@ public class FabaoClassPathXmlApplicationContext {
 	public FabaoClassPathXmlApplicationContext(String filename) {
 		this.readXML(filename);
 		this.instanceBeans();
+		this.injectObject();
+	}
+
+	/**
+	 * 注入对象
+	 */
+	private void injectObject() {
+		for(BeanDefinition beanDefinition:beanDefines)
+		{
+			Object bean = singletons.get(beanDefinition.getId());
+			//取得bean的属性描述
+			if(bean!=null)
+			{
+				try {
+					PropertyDescriptor[] ps = Introspector.getBeanInfo(bean.getClass()).getPropertyDescriptors();
+					for(PropertyDefinition propertyDefinition:beanDefinition.getPropertys()){
+						for(PropertyDescriptor properdesc:ps)
+						{
+							if(propertyDefinition.getName().equals(properdesc.getName())){
+								Method setter = properdesc.getWriteMethod();//获取属性的setter方法
+								if(setter!=null){
+									Object value = singletons.get(propertyDefinition.getRef());
+									setter.setAccessible(true);//允许调用私有方法
+									setter.invoke(bean, value);//引用对象注入属性
+								}
+								break;
+							}
+						}
+					}
+				} catch (IntrospectionException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				}
+			
+			}
+		}
+		
 	}
 
 	/**
@@ -54,7 +102,6 @@ public class FabaoClassPathXmlApplicationContext {
 				e.printStackTrace();
 			}
 		}
-		
 	}
 	
 	/**
@@ -89,6 +136,19 @@ public class FabaoClassPathXmlApplicationContext {
 				String id = element.attributeValue("id");//获取id属性
 				String clazz = element.attributeValue("class");//获取class属性值
 				BeanDefinition beanDefine = new BeanDefinition(id, clazz);
+				
+				//查询element下的子元素
+				XPath propertysub = element.createXPath("ns:property");
+				propertysub.setNamespaceURIs(nsMap);//设置命名空间
+				List<Element> propertys = propertysub.selectNodes(element);
+				for(Element property : propertys)
+				{
+					String propertyName = property.attributeValue("name");
+					String propertyRef = property.attributeValue("ref");
+					System.out.println("property:"+propertyName+"   propertyRef:"+propertyRef);
+					PropertyDefinition propertyDefinition = new PropertyDefinition(propertyName, propertyRef);
+					beanDefine.getPropertys().add(propertyDefinition);//将这一条 属性配置放到list集合里
+				}
 				
 				beanDefines.add(beanDefine);
 			}

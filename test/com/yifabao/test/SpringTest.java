@@ -28,10 +28,11 @@ public class SpringTest extends TestCase{
 	public void testInstanceSpring2(){
 		
 		FabaoClassPathXmlApplicationContext ctx = new FabaoClassPathXmlApplicationContext("beans1.xml");
-		Student studnet = (Student) ctx.getBean("student");
-		studnet.go();
-	}
+		//Student studnet = (Student) ctx.getBean("student");
+		//studnet.go();
+	}*/
 	
+	/*
 	public void testInstanceSpring3(){
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("beans1.xml");
 		PersonService personService = (PersonService) ctx.getBean("personService2");
@@ -43,11 +44,19 @@ public class SpringTest extends TestCase{
 		personService.save();
 	}*/
 	
-	public void testInstanceSpring5(){
+/*	public void testInstanceSpring5(){
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("beans1.xml");
 		PersonService personService = (PersonService) ctx.getBean("personService");
 		personService.save();
 		((AbstractApplicationContext)ctx).close();;
+	}*/
+	
+public void testInstanceSpring6(){
+		
+		FabaoClassPathXmlApplicationContext ctx = new FabaoClassPathXmlApplicationContext("beans1.xml");
+		PersonService personService = (PersonService) ctx.getBean("personService");
+		personService.save();
+		
 	}
 	
 	

@@ -7,11 +7,13 @@
         http://www.springframework.org/schema/aop
         http://www.springframework.org/schema/aop/spring-aop.xsd">
 
+	<bean id="personDao" class="com.yifabao.dao.impl.PersonDaoBean"></bean>
 	<bean id="personService" class="com.yifabao.service.PersonService" 
 			lazy-init="true" 
 			init-method="init"
-			destroy-method="destroy"
-			/>
+			destroy-method="destroy">
+			<property name="personDao" ref="personDao"></property>
+	</bean>
 	<!-- <bean id="personService2" class="com.yifabao.beanfactory.PersonServiceBeanFactory" factory-method="createPersonServiceBean"></bean>
 	
 	<bean id="personServiceBeanFactory" class="com.yifabao.beanfactory.PersonServiceBeanFactory"/>
