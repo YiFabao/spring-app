@@ -7,7 +7,16 @@
         http://www.springframework.org/schema/aop
         http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<bean id="personService" class="com.yifabao.service.PersonService" ></bean>
+	<bean id="personService" class="com.yifabao.service.PersonService" 
+			lazy-init="true" 
+			init-method="init"
+			destroy-method="destroy"
+			/>
+	<!-- <bean id="personService2" class="com.yifabao.beanfactory.PersonServiceBeanFactory" factory-method="createPersonServiceBean"></bean>
+	
+	<bean id="personServiceBeanFactory" class="com.yifabao.beanfactory.PersonServiceBeanFactory"/>
+	<bean id="personService3" factory-bean="personServiceBeanFactory" factory-method="createPersonServiceBean2"/> -->
+	
 	<bean id="student" class="com.yifabao.dao.impl.Student" ></bean>
 	<bean id="teacher" class="com.yifabao.dao.impl.Teacher" ></bean>
 	
